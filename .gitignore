@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# API Keys and Secrets
+*.key
+*.pem
+*.p12
+*.pfx
+config.py
+.env
+.env.local
+.env.production
+.env.staging
+
+# SSH Keys
+*_key
+*_key.pub
+github_key
+github_key.pub
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
