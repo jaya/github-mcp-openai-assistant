@@ -10,13 +10,14 @@ class GithubMCPClient:
         self.server_params = StdioServerParameters(
             command="docker",
             args=[
-                "run", "-i", "--rm",
-                "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
-                "ghcr.io/github/github-mcp-server"
+                "run",
+                "-i",
+                "--rm",
+                "-e",
+                "GITHUB_PERSONAL_ACCESS_TOKEN",
+                "ghcr.io/github/github-mcp-server",
             ],
-            env={
-                "GITHUB_PERSONAL_ACCESS_TOKEN": self.github_token
-            }
+            env={"GITHUB_PERSONAL_ACCESS_TOKEN": self.github_token},
         )
 
     async def execute_tool(self, tool_name: str, arguments: dict) -> dict:

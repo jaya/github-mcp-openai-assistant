@@ -15,7 +15,12 @@ class OpenAiLLM:
         if not self.api_key:
             raise RuntimeError("OPENAI_API_KEY not set")
 
-    def ask(self, system_prompts: List[str], question: str, assistant_prompt: Optional[str] = None) -> Tuple[str, List[Dict]]:
+    def ask(
+        self,
+        system_prompts: List[str],
+        question: str,
+        assistant_prompt: Optional[str] = None,
+    ) -> Tuple[str, List[Dict]]:
         from openai import (
             OpenAI,  # local import to avoid hard dependency at import time
         )
@@ -30,9 +35,6 @@ class OpenAiLLM:
             messages.append({"role": "assistant", "content": assistant_prompt})
 
         print("Asking OpenAI...")
-        resp = client.chat.completions.create(
-            model="gpt-5",
-            messages=messages
-        )
+        resp = client.chat.completions.create(model="gpt-5", messages=messages)
         answer = (resp.choices[0].message.content or "").strip()
         return answer, messages

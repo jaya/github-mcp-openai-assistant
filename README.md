@@ -26,7 +26,7 @@ export GITHUB_LOGIN="your_github_username"
 
 ### How to get the keys:
 
-1. **OpenAI API Key**: 
+1. **OpenAI API Key**:
    - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
    - Create a new API key
 
@@ -162,7 +162,7 @@ $ python main.py "What organizations am I part of?"
 
 The organizations you are part of are:
 - microsoft
-- github  
+- github
 - tensorflow
 - kubernetes
 

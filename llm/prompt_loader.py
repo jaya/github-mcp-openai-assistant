@@ -6,9 +6,10 @@ from typing import Dict, Union
 
 
 class PromptLoader:
-
     @staticmethod
-    def _load_file(filename: str, folder: str, is_json: bool = False) -> Union[Dict, str]:
+    def _load_file(
+        filename: str, folder: str, is_json: bool = False
+    ) -> Union[Dict, str]:
         """Generic file loader with minimal duplication."""
         path = os.path.join(folder, filename)
         try:

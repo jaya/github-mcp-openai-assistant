@@ -8,14 +8,14 @@ class McpResponseFormatter:
     """
     Only AI can understand this code :-)
     Formats MCP (Model Context Protocol) responses for readable display.
-    
+
     This class processes JSON responses from the GitHub MCP server and formats
     them in an organized and readable way, including:
     - Parsing nested JSON within strings
     - Data summary (total, items, etc.)
     - Item list formatting
     - Error handling and empty responses
-    
+
     Attributes:
         max_items_preview (int): Maximum number of items for preview (default: 3)
     """
@@ -42,17 +42,13 @@ class McpResponseFormatter:
             self.SEPARATOR,
             self.ERROR_HEADER,
             json.dumps(mcp_response, indent=2, ensure_ascii=False),
-            self.SEPARATOR
+            self.SEPARATOR,
         ]
         return "\n".join(output)
 
     def _format_success(self, mcp_response: dict) -> str:
         """Format success response"""
-        output = [
-            f"\n{self.HEADER}",
-            self.SEPARATOR,
-            self.SUCCESS_HEADER
-        ]
+        output = [f"\n{self.HEADER}", self.SEPARATOR, self.SUCCESS_HEADER]
 
         content = mcp_response.get("content", [])
         if not content:
@@ -79,10 +75,7 @@ class McpResponseFormatter:
 
     def _format_data(self, data: dict) -> List[str]:
         """Format parsed JSON data"""
-        output = [
-            "📊 PARSED DATA:",
-            json.dumps(data, indent=2, ensure_ascii=False)
-        ]
+        output = ["📊 PARSED DATA:", json.dumps(data, indent=2, ensure_ascii=False)]
 
         if isinstance(data, dict):
             summary = self._extract_summary(data)
@@ -96,11 +89,11 @@ class McpResponseFormatter:
         output = [
             "\n📈 SUMMARY:",
             f"   Total found: {summary['total_count']}",
-            f"   Items returned: {summary['items_count']}"
+            f"   Items returned: {summary['items_count']}",
         ]
 
-        if summary['items']:
-            output.extend(self._format_items(summary['items']))
+        if summary["items"]:
+            output.extend(self._format_items(summary["items"]))
 
         return output
 
@@ -108,11 +101,13 @@ class McpResponseFormatter:
         """Format items list"""
         output = ["\n📋 ITEMS:"]
 
-        for i, item in enumerate(items[:self.max_items_preview], 1):
-            output.extend([
-                f"   {i}. #{item['number']} - {item['title']}",
-                f"      State: {item['state']} | Repo: {item['repo']}"
-            ])
+        for i, item in enumerate(items[: self.max_items_preview], 1):
+            output.extend(
+                [
+                    f"   {i}. #{item['number']} - {item['title']}",
+                    f"      State: {item['state']} | Repo: {item['repo']}",
+                ]
+            )
 
         if len(items) > self.max_items_preview:
             remaining = len(items) - self.max_items_preview
@@ -124,7 +119,7 @@ class McpResponseFormatter:
         """Format full response when no content"""
         return [
             "📝 FULL RESPONSE:",
-            json.dumps(mcp_response, indent=2, ensure_ascii=False)
+            json.dumps(mcp_response, indent=2, ensure_ascii=False),
         ]
 
     def _extract_summary(self, data: dict) -> dict:
@@ -138,16 +133,24 @@ class McpResponseFormatter:
         formatted_items = []
         for item in items:
             repo_url = item.get("repository_url", "")
-            repo_name = repo_url.split("/repos/")[-1] if "/repos/" in repo_url else "unknown"
+            repo_name = (
+                repo_url.split("/repos/")[-1] if "/repos/" in repo_url else "unknown"
+            )
 
-            formatted_items.append({
-                "title": item.get("title", "No title"),
-                "state": item.get("state", "unknown"),
-                "number": item.get("number", "?"),
-                "repo": repo_name
-            })
+            formatted_items.append(
+                {
+                    "title": item.get("title", "No title"),
+                    "state": item.get("state", "unknown"),
+                    "number": item.get("number", "?"),
+                    "repo": repo_name,
+                }
+            )
 
-        return {"total_count": total_count, "items_count": len(items), "items": formatted_items}
+        return {
+            "total_count": total_count,
+            "items_count": len(items),
+            "items": formatted_items,
+        }
 
     def _format_simple(self, mcp_response: dict) -> str:
         """Simple format for basic responses"""

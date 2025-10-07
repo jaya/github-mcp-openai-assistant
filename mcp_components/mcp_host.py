@@ -35,13 +35,17 @@ class MCPHost:
 
             return True, tool_name, arguments
         else:
-            return False, f"Unsupported method: {method}. Only 'tools/call' and 'tools/list' methods are supported", {}
+            return (
+                False,
+                f"Unsupported method: {method}. Only 'tools/call' and 'tools/list' methods are supported",
+                {},
+            )
 
     async def _connect(self):
         """Test connection and print success message"""
         if not await self.mcp_client.test_connection():
             return {"error": "Failed to connect to MCP GitHub server!", "isError": True}
-        return  None
+        return None
 
     async def _execute_request(self, call_data: dict) -> dict:
         try:
@@ -56,10 +60,12 @@ class MCPHost:
                 return connection_error
 
             if message == "tools/list":
-
                 result = await self.mcp_client.list_tools()
 
-                return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}], "isError": False}
+                return {
+                    "content": [{"type": "text", "text": json.dumps(result, indent=2)}],
+                    "isError": False,
+                }
             else:
                 tool_name = message
                 result = await self.mcp_client.execute_tool(tool_name, arguments)

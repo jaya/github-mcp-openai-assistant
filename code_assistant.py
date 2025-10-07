@@ -10,7 +10,6 @@ from mcp_components.mcp_host import MCPHost
 
 
 class CodeAssistant:
-
     def __init__(self):
         self.github_login = os.getenv("GITHUB_LOGIN")
         self.llm = OpenAiLLM()
@@ -25,7 +24,7 @@ class CodeAssistant:
         self.system_prompts = [
             self.system_prompt,
             json.dumps(self.tools_prompt),
-            json.dumps(self.identity_msg)
+            json.dumps(self.identity_msg),
         ]
 
     async def ask(self, question: str) -> str:
@@ -45,17 +44,20 @@ class CodeAssistant:
         observation = {
             "type": "observation",
             "mcp_request": json.dumps(mcp_request),
-            "mcp_response": json.dumps(mcp_response)
+            "mcp_response": json.dumps(mcp_response),
         }
-        messages = messages + [{"role": "assistant", "content": json.dumps(observation)}]
+        messages = messages + [
+            {"role": "assistant", "content": json.dumps(observation)}
+        ]
 
         system_prompts = [msg["content"] for msg in messages if msg["role"] == "system"]
-        answer, messages = self.llm.ask(system_prompts, mcp_response, json.dumps(observation))
+        answer, messages = self.llm.ask(
+            system_prompts, mcp_response, json.dumps(observation)
+        )
 
         return await self._process(answer, messages)
 
     async def _execute_mcp_request(self, mcp_request: Dict) -> str:
-
         github_token = os.getenv("GITHUB_TOKEN")
         mcp_host = MCPHost(github_token)
         mcp_response = await mcp_host.execute(mcp_request)
