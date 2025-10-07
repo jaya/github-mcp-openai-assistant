@@ -19,6 +19,9 @@ export OPENAI_API_KEY="your_openai_key_here"
 
 # GitHub Personal Access Token
 export GITHUB_TOKEN="your_github_token_here"
+
+# GitHub Login (required)
+export GITHUB_LOGIN="your_github_username"
 ```
 
 ### How to get the keys:
@@ -30,6 +33,10 @@ export GITHUB_TOKEN="your_github_token_here"
 2. **GitHub Token**:
    - Go to GitHub Settings > Developer settings > Personal access tokens
    - Generate a token with permissions to access repositories and organizations
+
+3. **GitHub Login**:
+   - Use your GitHub username (the one that appears in your profile URL)
+   - Example: if your profile is `github.com/yourusername`, use `yourusername`
 
 ### Docker (for MCP GitHub Server):
 ```bash

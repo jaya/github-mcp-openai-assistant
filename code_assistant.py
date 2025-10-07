@@ -10,8 +10,8 @@ from llm.open_ai_llm import OpenAiLLM
 
 class CodeAssistant:
 
-    def __init__(self, github_login: str = "michelhdoumit"):
-        self.github_login = github_login
+    def __init__(self):
+        self.github_login = os.getenv("GITHUB_LOGIN")
         self.llm = OpenAiLLM()
         self._load_system_prompts()
     
