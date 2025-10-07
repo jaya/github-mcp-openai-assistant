@@ -57,7 +57,43 @@ cd eleminder-ai
 pip install -r requirements.txt
 ```
 
-3. Configure environment variables (see prerequisites section)
+3. Install pre-commit hooks (optional but recommended):
+```bash
+pre-commit install
+```
+
+4. Configure environment variables (see prerequisites section)
+
+## 🔧 Pre-commit Setup
+
+This project uses pre-commit hooks to ensure code quality. After installing dependencies, run:
+
+```bash
+# Install pre-commit hooks
+pre-commit install
+
+# Run pre-commit on all files (first time)
+pre-commit run --all-files
+```
+
+### What pre-commit does:
+- **Code formatting**: Automatically formats Python code with Ruff
+- **Linting**: Checks for code issues and fixes them automatically
+- **File checks**: Removes trailing whitespace, fixes end-of-file issues
+- **YAML validation**: Ensures configuration files are valid
+- **Large file detection**: Prevents accidentally committing large files
+
+### Manual usage:
+```bash
+# Run pre-commit on staged files only
+pre-commit run
+
+# Run pre-commit on all files
+pre-commit run --all-files
+
+# Update pre-commit hooks to latest versions
+pre-commit autoupdate
+```
 
 ## 🎯 How to use
 
