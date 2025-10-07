@@ -12,7 +12,7 @@ class PromptLoader:
         """Generic file loader with minimal duplication."""
         path = os.path.join(folder, filename)
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 if is_json:
                     return json.load(f)
                 else:

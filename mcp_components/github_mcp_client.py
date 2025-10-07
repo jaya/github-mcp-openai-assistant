@@ -3,6 +3,7 @@
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+
 class GithubMCPClient:
     def __init__(self, github_token: str):
         self.github_token = github_token
@@ -22,21 +23,21 @@ class GithubMCPClient:
         async def _call_tool(session):
             result = await session.call_tool(tool_name, arguments)
             return result.model_dump()
-        
+
         return await self._execute_operation(_call_tool)
 
     async def list_tools(self) -> list:
         async def _list_tools(session):
             tools_response = await session.list_tools()
             return [tool.model_dump() for tool in tools_response.tools]
-        
+
         result = await self._execute_operation(_list_tools)
         return result if isinstance(result, list) else []
 
     async def test_connection(self) -> bool:
         async def _test_connection(session):
             return True
-        
+
         result = await self._execute_operation(_test_connection)
         if isinstance(result, dict) and result.get("isError"):
             return False
