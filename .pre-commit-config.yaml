@@ -15,9 +15,3 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
-
-  # MyPy disabled for now due to dependency issues
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.7.1
-  #   hooks:
-  #     - id: mypy
