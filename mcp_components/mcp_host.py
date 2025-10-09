@@ -7,14 +7,16 @@ from mcp_components.mcp_response_formatter import McpResponseFormatter
 
 
 class MCPHost:
-    def __init__(self, github_token: str):
-        self.mcp_client = GithubMCPClient(github_token)
+    def __init__(self):
+        self.mcp_client = GithubMCPClient()
         self.formatter = McpResponseFormatter()
 
+    async def cleanup(self):
+        """Cleanup MCP client resources"""
+        await self.mcp_client.disconnect()
+
     async def execute(self, call_data: dict):
-        print(f"Executing MCP request... {call_data}")
         response = await self._execute_request(call_data)
-        print(f"MCP response... {response}")
         return response
 
     def _validate_request(self, call_data: dict) -> tuple[bool, str, dict]:
@@ -73,7 +75,3 @@ class MCPHost:
 
         except Exception as e:
             return {"error": f"Error executing MCP call: {e}", "isError": True}
-
-    def _print_result(self, result: dict):
-        formatted_output = self.formatter.format_mcp_response(result)
-        print(formatted_output)
