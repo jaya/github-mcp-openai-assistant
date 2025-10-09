@@ -7,8 +7,11 @@ import os
 
 class GithubMCPClient:
     def __init__(self):
-        self.github_token = os.getenv("GITHUB_TOKEN")
-        self.server_params = StdioServerParameters(
+        self._connection = None  # Stores (client_context, session) tuple
+
+    def _get_server_params(self):
+        """Build server parameters for Docker MCP connection"""
+        return StdioServerParameters(
             command="docker",
             args=[
                 "run",  # Run a new Docker container
@@ -19,70 +22,56 @@ class GithubMCPClient:
                 "ghcr.io/github/github-mcp-server",  # GitHub MCP server Docker image
             ],
             env={
-                "GITHUB_PERSONAL_ACCESS_TOKEN": self.github_token
+                "GITHUB_PERSONAL_ACCESS_TOKEN": os.getenv("GITHUB_TOKEN")
             },  # Pass GitHub token to container
         )
-        self._session = None
-        self._read = None
-        self._write = None
-        self._client_context = None
 
     async def connect(self):
         """Initialize and maintain a persistent MCP session"""
-        if self._session is not None:
+        if self._connection is not None:
             return  # Already connected
 
         try:
-            # Create the stdio client context
-            self._client_context = stdio_client(self.server_params)
-            self._read, self._write = await self._client_context.__aenter__()
+            client_context = stdio_client(self._get_server_params())
+            read, write = await client_context.__aenter__()
+            session = ClientSession(read, write)
+            await session.initialize()
 
-            # Create and initialize the session
-            self._session = ClientSession(self._read, self._write)
-            await self._session.__aenter__()
-            await self._session.initialize()
+            self._connection = (client_context, session)
         except Exception as e:
             await self.disconnect()
             raise Exception(f"Failed to connect to MCP server: {e}")
 
     async def disconnect(self):
         """Close the persistent MCP session"""
-        if self._session:
+        if self._connection:
+            client_context, _ = self._connection
+
             try:
-                await self._session.__aexit__(None, None, None)
+                await client_context.__aexit__(None, None, None)
             except Exception:
                 pass
-            self._session = None
 
-        if self._client_context:
-            try:
-                await self._client_context.__aexit__(None, None, None)
-            except Exception:
-                pass
-            self._client_context = None
-
-        self._read = None
-        self._write = None
+            self._connection = None
 
     async def _ensure_connected(self):
-        """Ensure we have an active session"""
-        if self._session is None:
+        if self._connection is None:
             await self.connect()
 
     async def execute_tool(self, tool_name: str, arguments: dict) -> dict:
-        """Execute a tool using the persistent session"""
         try:
             await self._ensure_connected()
-            result = await self._session.call_tool(tool_name, arguments)
+            _, session = self._connection
+            result = await session.call_tool(tool_name, arguments)
             return result.model_dump()
         except Exception as e:
             return {"error": f"Error executing tool: {e}", "isError": True}
 
     async def list_tools(self) -> list:
-        """List available tools using the persistent session"""
         try:
             await self._ensure_connected()
-            tools_response = await self._session.list_tools()
+            _, session = self._connection
+            tools_response = await session.list_tools()
             return [tool.model_dump() for tool in tools_response.tools]
         except Exception:
             return []
@@ -94,12 +83,3 @@ class GithubMCPClient:
             return True
         except Exception:
             return False
-
-    async def __aenter__(self):
-        """Context manager entry"""
-        await self.connect()
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit"""
-        await self.disconnect()
