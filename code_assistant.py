@@ -1,38 +1,50 @@
 #!/usr/bin/env python3
 
 import json
-import os
-from typing import Dict, List
+from typing import Dict
 
-from llm.open_ai_llm import OpenAiLLM
-from llm.prompt_loader import PromptLoader
+from llm.open_ai_llm import OpenAiSession
 from mcp_components.mcp_host import MCPHost
 
 
 class CodeAssistant:
     def __init__(self):
-        self.github_login = os.getenv("GITHUB_LOGIN")
-        self.llm = OpenAiLLM()
-        self._load_system_prompts()
+        self.session = OpenAiSession()
+        self.mcp_host = MCPHost()
 
-    def _load_system_prompts(self):
-        """Load system prompts and identity configuration."""
-        self.system_prompt = PromptLoader.load_prompt("natural-github.txt")
-        self.tools_prompt = PromptLoader.load_prompt("tools.json")
-        self.identity_msg = {"type": "identity", "github_login": self.github_login}
+    async def start_conversation(self) -> None:
+        print("🤖 GitHub Code Assistant - Interactive Mode")
+        print("Type 'exit', 'quit', or 'bye' to end the conversation")
+        print("=" * 50)
 
-        self.system_prompts = [
-            self.system_prompt,
-            json.dumps(self.tools_prompt),
-            json.dumps(self.identity_msg),
-        ]
+        try:
+            while True:
+                try:
+                    question = input("\nUser: ").strip()
+                    if question.lower() in ["exit", "quit", "bye", "q"]:
+                        print("👋 Goodbye!")
+                        break
+
+                    if not question:
+                        continue
+
+                    print("Assistant: Thinking ...")
+                    result = await self.ask(question)
+                    print("Assistant: ", result)
+
+                except KeyboardInterrupt:
+                    print("\n👋 Goodbye!")
+                    break
+        finally:
+            # Cleanup MCP resources
+            await self.mcp_host.cleanup()
 
     async def ask(self, question: str) -> str:
-        answer, messages = self.llm.ask(self.system_prompts, question)
-        result = await self._process(answer, messages)
+        answer = self.session.ask(question)
+        result = await self._process(answer)
         return result
 
-    async def _process(self, answer: str, messages: List[Dict]) -> str:
+    async def _process(self, answer: str) -> str:
         answer_json = json.loads(answer)
 
         if answer_json.get("type") == "final_answer":
@@ -41,24 +53,9 @@ class CodeAssistant:
         mcp_request = answer_json.get("rpc")
         mcp_response = await self._execute_mcp_request(mcp_request)
 
-        observation = {
-            "type": "observation",
-            "mcp_request": json.dumps(mcp_request),
-            "mcp_response": json.dumps(mcp_response),
-        }
-        messages = messages + [
-            {"role": "assistant", "content": json.dumps(observation)}
-        ]
-
-        system_prompts = [msg["content"] for msg in messages if msg["role"] == "system"]
-        answer, messages = self.llm.ask(
-            system_prompts, mcp_response, json.dumps(observation)
-        )
-
-        return await self._process(answer, messages)
+        answer = self.session.ask(mcp_response)
+        return await self._process(answer)
 
     async def _execute_mcp_request(self, mcp_request: Dict) -> str:
-        github_token = os.getenv("GITHUB_TOKEN")
-        mcp_host = MCPHost(github_token)
-        mcp_response = await mcp_host.execute(mcp_request)
+        mcp_response = await self.mcp_host.execute(mcp_request)
         return json.dumps(mcp_response)
