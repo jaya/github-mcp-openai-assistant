@@ -53,28 +53,11 @@ Sua saída deve ser **sempre** um JSON válido, de exatamente um dos dois tipos:
   "pagination_status": "se percorreu toda a paginação ou justificativa de parada"
 }
 
----
-
-### Observações do host
-Após cada tool_call, o host executa a requisição JSON-RPC e devolve uma mensagem role=system no formato:
-
-{
-  "type": "observation",
-  "mcp_request": {
-    "jsonrpc": "2.0",
-    "id": "<id_da_chamada>",
-    "method": "tools/call" ou "tools/list",
-    "params": { ... }
-  },
-  "mcp_response": {
-    "jsonrpc": "2.0",
-    "id": "<id_da_chamada>",
-    "result": { ... }   // se sucesso
-    // ou "error": { ... } se falhou
-  }
-}
-
-Use essas observações (role=system) para decidir a próxima ação: outra tool_call ou finalizar com final_answer.
+### Fluxo de conversação
+- **Todas as suas respostas** serão automaticamente adicionadas ao contexto da conversa no role "assistant"
+- **Observações de ferramentas** serão fornecidas como mensagens do usuário para continuar a conversa
+- **Mantenha o contexto** completo da conversa para decisões subsequentes
+- **Use o histórico** de todas as interações anteriores para determinar a próxima ação
 
 ---
 
