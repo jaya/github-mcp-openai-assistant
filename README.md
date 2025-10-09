@@ -99,7 +99,11 @@ pre-commit autoupdate
 
 ### Basic execution:
 ```bash
-python main.py "Your question here"
+# Interactive mode (recommended)
+python main.py
+
+# With initial question
+python main.py "What organizations am I part of?"
 ```
 
 ### Example questions you can ask:
@@ -142,10 +146,40 @@ python main.py "What were the latest releases of repository 'python/cpython'?"
 python main.py "Show the release notes for Python v3.12.0"
 ```
 
-### Interactive mode:
+### Interactive Mode (Recommended):
+The assistant now runs in interactive mode by default, maintaining conversation context:
+
 ```bash
 python main.py
-# Type your question when prompted
+```
+
+**Features:**
+- **Conversation context**: The assistant remembers previous questions and answers
+- **Continuous dialogue**: Ask follow-up questions naturally
+- **Easy exit**: Type `exit`, `quit`, `bye`, or `q` to end the conversation
+- **Keyboard shortcuts**: Use `Ctrl+C` to exit anytime
+
+**Example session:**
+```
+🤖 GitHub Code Assistant - Interactive Mode
+Type 'exit', 'quit', or 'bye' to end the conversation
+==================================================
+
+User: What organizations am I part of?
+
+🤖 Assistant: You are part of the following organizations:
+- microsoft
+- github
+- tensorflow
+
+User: Show me the latest commits from the microsoft/vscode repository
+
+🤖 Assistant: Here are the latest commits from microsoft/vscode:
+- commit abc123: Fix TypeScript error handling
+- commit def456: Update documentation
+
+User: exit
+👋 Goodbye!
 ```
 
 ## 🏗️ Architecture
