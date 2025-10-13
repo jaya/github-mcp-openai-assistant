@@ -7,7 +7,7 @@ import os
 
 class GithubMCPClient:
     def __init__(self):
-        self._connection = None  # Stores (client_context, session) tuple
+        pass
 
     def _get_server_params(self):
         """Build server parameters for Docker MCP connection"""
@@ -20,66 +20,50 @@ class GithubMCPClient:
                 "-e",  # Set environment variable in container
                 "GITHUB_PERSONAL_ACCESS_TOKEN",  # Environment variable name
                 "ghcr.io/github/github-mcp-server",  # GitHub MCP server Docker image
+                "stdio",  # Explicit stdio command
             ],
             env={
                 "GITHUB_PERSONAL_ACCESS_TOKEN": os.getenv("GITHUB_TOKEN")
             },  # Pass GitHub token to container
         )
 
-    async def connect(self):
-        """Initialize and maintain a persistent MCP session"""
-        if self._connection is not None:
-            return  # Already connected
-
+    async def _execute_operation(self, operation):
+        """Execute an operation with a fresh MCP session for each call"""
         try:
-            client_context = stdio_client(self._get_server_params())
-            read, write = await client_context.__aenter__()
-            session = ClientSession(read, write)
-            await session.initialize()
-
-            self._connection = (client_context, session)
+            async with stdio_client(self._get_server_params()) as (read, write):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    result = await operation(session)
+                    return result
         except Exception as e:
-            await self.disconnect()
-            raise Exception(f"Failed to connect to MCP server: {e}")
-
-    async def disconnect(self):
-        """Close the persistent MCP session"""
-        if self._connection:
-            client_context, _ = self._connection
-
-            try:
-                await client_context.__aexit__(None, None, None)
-            except Exception:
-                pass
-
-            self._connection = None
-
-    async def _ensure_connected(self):
-        if self._connection is None:
-            await self.connect()
+            return {"error": f"Error executing MCP call: {e}", "isError": True}
 
     async def execute_tool(self, tool_name: str, arguments: dict) -> dict:
-        try:
-            await self._ensure_connected()
-            _, session = self._connection
+        """Execute a tool using a fresh session"""
+
+        async def _call_tool(session):
             result = await session.call_tool(tool_name, arguments)
             return result.model_dump()
-        except Exception as e:
-            return {"error": f"Error executing tool: {e}", "isError": True}
+
+        return await self._execute_operation(_call_tool)
 
     async def list_tools(self) -> list:
-        try:
-            await self._ensure_connected()
-            _, session = self._connection
+        """List available tools using a fresh session"""
+
+        async def _list_tools(session):
             tools_response = await session.list_tools()
             return [tool.model_dump() for tool in tools_response.tools]
-        except Exception:
-            return []
+
+        result = await self._execute_operation(_list_tools)
+        return result if isinstance(result, list) else []
 
     async def test_connection(self) -> bool:
         """Test the MCP connection"""
-        try:
-            await self._ensure_connected()
+
+        async def _test_connection(session):
             return True
-        except Exception:
+
+        result = await self._execute_operation(_test_connection)
+        if isinstance(result, dict) and result.get("isError"):
             return False
+        return True

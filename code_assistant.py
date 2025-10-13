@@ -17,27 +17,23 @@ class CodeAssistant:
         print("Type 'exit', 'quit', or 'bye' to end the conversation")
         print("=" * 50)
 
-        try:
-            while True:
-                try:
-                    question = input("\nUser: ").strip()
-                    if question.lower() in ["exit", "quit", "bye", "q"]:
-                        print("👋 Goodbye!")
-                        break
-
-                    if not question:
-                        continue
-
-                    print("Assistant: Thinking ...")
-                    result = await self.ask(question)
-                    print("Assistant: ", result)
-
-                except KeyboardInterrupt:
-                    print("\n👋 Goodbye!")
+        while True:
+            try:
+                question = input("\nUser: ").strip()
+                if question.lower() in ["exit", "quit", "bye", "q"]:
+                    print("👋 Goodbye!")
                     break
-        finally:
-            # Cleanup MCP resources
-            await self.mcp_host.cleanup()
+
+                if not question:
+                    continue
+
+                print("Assistant: Thinking ...")
+                result = await self.ask(question)
+                print("Assistant: ", result)
+
+            except KeyboardInterrupt:
+                print("\n👋 Goodbye!")
+                break
 
     async def ask(self, question: str) -> str:
         answer = self.session.ask(question)
@@ -51,6 +47,7 @@ class CodeAssistant:
             return answer_json.get("answer_markdown")
 
         mcp_request = answer_json.get("rpc")
+        print(f"MCP request: {mcp_request}")
         mcp_response = await self._execute_mcp_request(mcp_request)
 
         answer = self.session.ask(mcp_response)
