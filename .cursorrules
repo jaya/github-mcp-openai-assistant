@@ -62,7 +62,19 @@ def process_data(data):
 - Documenting API signatures (use type hints instead)
 - Explaining basic programming concepts
 
-### 8. Git and Commits
+### 8. Object-Oriented Design
+- **Single Responsibility**: Each class should have one clear purpose
+- **Composition over Inheritance**: Prefer composition and delegation
+- **Separation of Concerns**: Extract complex logic into separate classes/files
+- **Avoid Over-Engineering**: Don't create methods with single-line implementations
+
+### 9. Refactoring Guidelines
+- **Extract when complex**: Move complex logic to separate classes
+- **Keep it simple**: Prefer direct code over unnecessary abstractions
+- **Organize by responsibility**: Separate files for different concerns
+- **Test the refactor**: Ensure functionality remains the same
+
+### 10. Git and Commits
 - **NEVER suggest commits** unless explicitly asked
 - Only commit when user explicitly requests it
 - Don't propose commit messages or git operations

@@ -1,61 +1,37 @@
-#!/usr/bin/env python3
-
 import json
-from typing import Dict
 
+from conversation_loop import ConversationLoop
 from llm.open_ai_llm import OpenAiSession
-from mcp_components.github_mcp_client import GithubMCPClient
+from mcp_components.github_mcp import GitHubMCP
+from mcp_components.stdio_mcp_client import StdioMCPClient
 
 
 class CodeAssistant:
-    def __init__(self):
-        self.session = OpenAiSession()
-        self.mcp_client = GithubMCPClient()
+    def __init__(self) -> None:
+        self.llm_session = OpenAiSession()
+        self.mcp_client = StdioMCPClient(GitHubMCP().get_params())
 
     async def start_conversation(self) -> None:
-        print("🤖 GitHub Code Assistant - Interactive Mode")
-        print("Type 'exit', 'quit', or 'bye' to end the conversation")
-        print("=" * 50)
-
-        try:
-            while True:
-                try:
-                    question = input("\nUser: ").strip()
-                    if question.lower() in ["exit", "quit", "bye", "q"]:
-                        print("👋 Goodbye!")
-                        break
-
-                    if not question:
-                        continue
-
-                    print("Assistant: Thinking ...")
-                    result = await self.ask(question)
-                    print("Assistant: ", result)
-
-                except KeyboardInterrupt:
-                    print("\n👋 Goodbye!")
-                    break
-        finally:
-            await self.mcp_client.cleanup()
+        loop = ConversationLoop()
+        await loop.run(self.ask, self.mcp_client.cleanup)
 
     async def ask(self, question: str) -> str:
-        answer = self.session.ask(question)
+        answer = self.llm_session.ask(question)
         result = await self._process(answer)
         return result
 
     async def _process(self, answer: str) -> str:
         answer_json = json.loads(answer)
-
         if answer_json.get("type") == "final_answer":
             return answer_json.get("answer_markdown")
 
-        mcp_request = answer_json.get("rpc")
-        print(f"MCP request: {mcp_request}")
-        mcp_response = await self._execute_mcp_request(mcp_request)
+        method = answer_json.get("method")
+        tool_name = answer_json.get("tool_name")
+        arguments = answer_json.get("arguments")
+        print(f"MCP request: method={method}, tool={tool_name}, args={arguments}")
 
-        answer = self.session.ask(mcp_response)
+        response = await self.mcp_client.execute(method, tool_name, arguments)
+        mcp_response = json.dumps(response)
+
+        answer = self.llm_session.ask(mcp_response)
         return await self._process(answer)
-
-    async def _execute_mcp_request(self, mcp_request: Dict) -> str:
-        response = await self.mcp_client.execute(mcp_request)
-        return json.dumps(response)
