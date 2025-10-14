@@ -57,20 +57,5 @@ class CodeAssistant:
         return await self._process(answer)
 
     async def _execute_mcp_request(self, mcp_request: Dict) -> str:
-        method = mcp_request["method"]
-        params = mcp_request["params"]
-
-        if method == "tools/list":
-            result = await self.mcp_client.list_tools()
-            response = {
-                "content": [{"type": "text", "text": json.dumps(result, indent=2)}],
-                "isError": False,
-            }
-        elif method == "tools/call":
-            tool_name = params["name"]
-            arguments = params["arguments"]
-            response = await self.mcp_client.execute_tool(tool_name, arguments)
-        else:
-            raise ValueError(f"Unsupported method: {method}")
-
+        response = await self.mcp_client.execute(mcp_request)
         return json.dumps(response)

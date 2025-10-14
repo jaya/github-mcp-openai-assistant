@@ -3,6 +3,7 @@
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 import os
+import json
 from contextlib import AsyncExitStack
 
 
@@ -47,6 +48,23 @@ class GithubMCPClient:
         await self._ensure_session()
         tools_response = await self._session.list_tools()
         return [tool.model_dump() for tool in tools_response.tools]
+
+    async def execute(self, mcp_request: dict):
+        method = mcp_request["method"]
+        params = mcp_request["params"]
+
+        if method == "tools/list":
+            result = await self.list_tools()
+            return {
+                "content": [{"type": "text", "text": json.dumps(result, indent=2)}],
+                "isError": False,
+            }
+        elif method == "tools/call":
+            tool_name = params["name"]
+            arguments = params["arguments"]
+            return await self.execute_tool(tool_name, arguments)
+        else:
+            raise ValueError(f"Unsupported method: {method}")
 
     async def cleanup(self):
         if self._stack is not None:
