@@ -3,11 +3,14 @@
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 import os
+from contextlib import AsyncExitStack
 
 
 class GithubMCPClient:
     def __init__(self):
-        pass
+        self._tools_cache = None  # Cache for tools list
+        self._stack: AsyncExitStack | None = None
+        self._session: ClientSession | None = None
 
     def _get_server_params(self):
         """Build server parameters for Docker MCP connection"""
@@ -27,14 +30,25 @@ class GithubMCPClient:
             },  # Pass GitHub token to container
         )
 
+    async def _ensure_session(self) -> None:
+        """Ensure a single reusable MCP session is available (AsyncExitStack-based)."""
+        if self._session is not None:
+            return
+        self._stack = AsyncExitStack()
+        read, write = await self._stack.enter_async_context(
+            stdio_client(self._get_server_params())
+        )
+        self._session = await self._stack.enter_async_context(
+            ClientSession(read, write)
+        )
+        await self._session.initialize()
+
     async def _execute_operation(self, operation):
-        """Execute an operation with a fresh MCP session for each call"""
+        """Execute an operation using a persistent session."""
         try:
-            async with stdio_client(self._get_server_params()) as (read, write):
-                async with ClientSession(read, write) as session:
-                    await session.initialize()
-                    result = await operation(session)
-                    return result
+            await self._ensure_session()
+            result = await operation(self._session)
+            return result
         except Exception as e:
             return {"error": f"Error executing MCP call: {e}", "isError": True}
 
@@ -48,14 +62,21 @@ class GithubMCPClient:
         return await self._execute_operation(_call_tool)
 
     async def list_tools(self) -> list:
-        """List available tools using a fresh session"""
+        """List available tools using cached result or fresh session"""
+        # Return cached tools if available
+        if self._tools_cache is not None:
+            return self._tools_cache
 
         async def _list_tools(session):
             tools_response = await session.list_tools()
             return [tool.model_dump() for tool in tools_response.tools]
 
         result = await self._execute_operation(_list_tools)
-        return result if isinstance(result, list) else []
+        if isinstance(result, list):
+            # Cache the tools list for future calls
+            self._tools_cache = result
+            return result
+        return []
 
     async def test_connection(self) -> bool:
         """Test the MCP connection"""
@@ -67,3 +88,11 @@ class GithubMCPClient:
         if isinstance(result, dict) and result.get("isError"):
             return False
         return True
+
+    async def cleanup(self):
+        """Cleanup resources (close persistent session and clear cache)."""
+        self._tools_cache = None
+        if self._stack is not None:
+            await self._stack.aclose()
+            self._stack = None
+            self._session = None

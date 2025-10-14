@@ -17,23 +17,27 @@ class CodeAssistant:
         print("Type 'exit', 'quit', or 'bye' to end the conversation")
         print("=" * 50)
 
-        while True:
-            try:
-                question = input("\nUser: ").strip()
-                if question.lower() in ["exit", "quit", "bye", "q"]:
-                    print("👋 Goodbye!")
+        try:
+            while True:
+                try:
+                    question = input("\nUser: ").strip()
+                    if question.lower() in ["exit", "quit", "bye", "q"]:
+                        print("👋 Goodbye!")
+                        break
+
+                    if not question:
+                        continue
+
+                    print("Assistant: Thinking ...")
+                    result = await self.ask(question)
+                    print("Assistant: ", result)
+
+                except KeyboardInterrupt:
+                    print("\n👋 Goodbye!")
                     break
-
-                if not question:
-                    continue
-
-                print("Assistant: Thinking ...")
-                result = await self.ask(question)
-                print("Assistant: ", result)
-
-            except KeyboardInterrupt:
-                print("\n👋 Goodbye!")
-                break
+        finally:
+            # Cleanup MCP resources
+            await self.mcp_host.cleanup()
 
     async def ask(self, question: str) -> str:
         answer = self.session.ask(question)

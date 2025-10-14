@@ -11,6 +11,10 @@ class MCPHost:
         self.mcp_client = GithubMCPClient()
         self.formatter = McpResponseFormatter()
 
+    async def cleanup(self):
+        """Cleanup MCP client resources"""
+        await self.mcp_client.cleanup()
+
     async def execute(self, call_data: dict):
         response = await self._execute_request(call_data)
         return response

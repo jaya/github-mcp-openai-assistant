@@ -34,6 +34,9 @@ async def test_simple():
     result = await mcp_host.execute(call_data)
     print(f"Result: {result}")
 
+    # Cleanup persistent MCP resources
+    await mcp_host.cleanup()
+
 
 if __name__ == "__main__":
     asyncio.run(test_simple())
