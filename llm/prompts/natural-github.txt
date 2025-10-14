@@ -21,15 +21,9 @@ Sua saída deve ser **sempre** um JSON válido, de exatamente um dos dois tipos:
 1) **Solicitar chamada MCP**
 {
   "type": "tool_call",
-  "rpc": {
-    "jsonrpc": "2.0",
-    "id": "string",
-    "method": "tools/call",
-    "params": {
-      "name": "<nome_da_tool_exatamente_como_no_tools_list>",
-      "arguments": { ... }   // estritamente conforme o inputSchema da tool
-    }
-  },
+  "method": "tools/call",
+  "tool_name": "<nome_da_tool_exatamente_como_no_tools_list>",
+  "arguments": { ... },   // estritamente conforme o inputSchema da tool
   "reason": "por que esta chamada é necessária",
   "expect": "o que você espera receber e como isso ajuda"
 }
@@ -37,7 +31,7 @@ Sua saída deve ser **sempre** um JSON válido, de exatamente um dos dois tipos:
 > Observação: se precisar descobrir as ferramentas disponíveis, solicite:
 {
   "type": "tool_call",
-  "rpc": { "jsonrpc":"2.0","id":"string","method":"tools/list","params":{} },
+  "method": "tools/list",
   "reason": "Descobrir catálogo de ferramentas expostas",
   "expect": "Lista de tools com schemas"
 }

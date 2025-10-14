@@ -1,8 +1,9 @@
-#!/usr/bin/env python3
-
 import asyncio
+
 from dotenv import load_dotenv
+
 from code_assistant import CodeAssistant
+
 
 # Load environment variables from .env file
 load_dotenv()

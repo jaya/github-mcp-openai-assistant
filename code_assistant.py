@@ -9,7 +9,7 @@ from mcp_components.stdio_mcp_client import StdioMCPClient
 class CodeAssistant:
     def __init__(self) -> None:
         self.llm_session = OpenAiSession()
-        self.mcp_client = StdioMCPClient(GitHubMCP().get_params())
+        self.mcp_client = StdioMCPClient(GitHubMCP.get_params())
 
     async def start_conversation(self) -> None:
         loop = ConversationLoop()

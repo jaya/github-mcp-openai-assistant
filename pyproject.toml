@@ -1,0 +1,107 @@
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+preview = true
+
+# Rule families:
+# E,F,W  = pycodestyle/pyflakes
+# I      = isort (imports)
+# N      = naming
+# UP     = pyupgrade
+# B      = bugbear
+# C4     = comprehensions
+# ANN    = type annotations
+# S      = bandit (security)
+# C90    = cyclomatic complexity (mccabe)
+# ERA    = eradicate (dead code)
+# T20    = print statements
+# PT     = pytest
+# PL     = pylint (subset)
+# TID    = tidy imports
+# EXE    = executable files
+# RUF    = Ruff-specific rules
+lint.select = [
+  "E","F","W",
+  "I","N","UP",
+  "B","C4",
+  "ANN",
+  "S","C90",
+  "ERA",
+  "PT","PL",
+  "TID","EXE",
+  "RUF"
+]
+
+# Style preferences (tweak to taste)
+lint.ignore = [
+  "D203",  # prefer D211
+  "D213",  # prefer first-line summary
+  "E203"   # Black compatibility
+]
+
+# Keep functions small/clear
+
+exclude = [
+  ".git", ".hg", ".mypy_cache", ".ruff_cache", ".venv",
+  "build", "dist", "__pycache__",
+]
+
+# ---------- Subsettings ----------
+
+# Import sorting (isort)
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+known-first-party = ["your_package"]   # <-- change to your package/module name(s)
+known-third-party = ["mcp","openai"]  # <-- trim to what you use
+lines-after-imports = 2
+section-order = ["future","standard-library","third-party","first-party","local-folder"]
+
+# Docstrings (pydocstyle)
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # or "numpy"
+
+# Tidy imports
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+# Type annotations
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = false
+mypy-init-return = true
+suppress-dummy-args = true
+suppress-none-returning = false
+
+# Bugbear (no FastAPI-specific entries)
+[tool.ruff.lint.flake8-bugbear]
+# keep empty or add your own immutable calls if needed
+
+# Eradicate commented-out code is handled by ERA rules in select
+
+# McCabe complexity
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+# Pylint-like limits to keep functions tidy
+[tool.ruff.lint.pylint]
+max-args = 4
+max-branches = 4
+max-returns = 3
+max-statements = 30
+allow-magic-value-types = ["int","str","float"]
+
+# Ruff’s own
+[tool.ruff.lint.ruff]
+# e.g., RUF100: no-unused-noqa enabled by default via select
+
+# ---------- Per-file ignores ----------
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]     # allow re-exports
+"tests/**/*.py"   = ["D","S101","ANN"]  # relax in tests (docstrings, assert, type hints)
+
+# ---------- (Optional) Ruff formatter ----------
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 88

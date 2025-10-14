@@ -1,22 +1,17 @@
-#!/usr/bin/env python3
-
+import json
 import os
+
+from openai import OpenAI
+
+from llm.prompt_loader import PromptLoader
 
 
 class OpenAiSession:
-    """
-    OpenAI session that maintains conversation context.
-    Encapsulates system prompts and conversation history.
-    """
-
-    def __init__(self):
+    def __init__(self) -> None:
         self._load_system_prompts()
         self.conversation_messages = []
 
     def _load_system_prompts(self) -> None:
-        from llm.prompt_loader import PromptLoader
-        import json
-
         self.system_prompt = PromptLoader.load_prompt("natural-github.txt")
         self.tools_prompt = PromptLoader.load_prompt("tools.json")
         self.identity_msg = {
@@ -31,14 +26,10 @@ class OpenAiSession:
         ]
 
     def ask(self, question: str) -> str:
-        from openai import OpenAI
-
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         if not self.conversation_messages:
-            messages = [
-                {"role": "system", "content": prompt} for prompt in self.system_prompts
-            ]
+            messages = [{"role": "system", "content": prompt} for prompt in self.system_prompts]
         else:
             messages = self.conversation_messages.copy()
 
