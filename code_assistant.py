@@ -4,13 +4,13 @@ import json
 from typing import Dict
 
 from llm.open_ai_llm import OpenAiSession
-from mcp_components.mcp_host import MCPHost
+from mcp_components.github_mcp_client import GithubMCPClient
 
 
 class CodeAssistant:
     def __init__(self):
         self.session = OpenAiSession()
-        self.mcp_host = MCPHost()
+        self.mcp_client = GithubMCPClient()
 
     async def start_conversation(self) -> None:
         print("🤖 GitHub Code Assistant - Interactive Mode")
@@ -36,8 +36,7 @@ class CodeAssistant:
                     print("\n👋 Goodbye!")
                     break
         finally:
-            # Cleanup MCP resources
-            await self.mcp_host.cleanup()
+            await self.mcp_client.cleanup()
 
     async def ask(self, question: str) -> str:
         answer = self.session.ask(question)
@@ -58,5 +57,20 @@ class CodeAssistant:
         return await self._process(answer)
 
     async def _execute_mcp_request(self, mcp_request: Dict) -> str:
-        mcp_response = await self.mcp_host.execute(mcp_request)
-        return json.dumps(mcp_response)
+        method = mcp_request["method"]
+        params = mcp_request["params"]
+
+        if method == "tools/list":
+            result = await self.mcp_client.list_tools()
+            response = {
+                "content": [{"type": "text", "text": json.dumps(result, indent=2)}],
+                "isError": False,
+            }
+        elif method == "tools/call":
+            tool_name = params["name"]
+            arguments = params["arguments"]
+            response = await self.mcp_client.execute_tool(tool_name, arguments)
+        else:
+            raise ValueError(f"Unsupported method: {method}")
+
+        return json.dumps(response)
