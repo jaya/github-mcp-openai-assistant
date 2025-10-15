@@ -81,14 +81,14 @@ If you'd like, I can: request a Copilot review, fetch reviewers details, or trig
 
 🤖 Assistant: Here are the critical issues requiring immediate attention:
 
-**High Priority (P0):**
+High Priority (P0):
 1) company/api #234 - "Database connection pool exhaustion"
    - Link: https://github.com/company/api/issues/234
 
 2) company/frontend #189 - "Memory leak in dashboard"
    - Link: https://github.com/company/frontend/issues/189
 
-**Medium Priority (P1):**
+Medium Priority (P1):
 3) company/mobile #156 - "Push notifications not working on iOS"
    - Link: https://github.com/company/mobile/issues/156
 ```
