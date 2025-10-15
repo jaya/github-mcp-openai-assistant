@@ -97,7 +97,6 @@ allow-magic-value-types = ["int","str","float"]
 # ---------- Per-file ignores ----------
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401"]     # allow re-exports
-"tests/**/*.py"   = ["D","S101","ANN"]  # relax in tests (docstrings, assert, type hints)
 
 # ---------- (Optional) Ruff formatter ----------
 [tool.ruff.format]
