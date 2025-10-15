@@ -19,14 +19,14 @@ class ConversationLoop:
 
     async def _handle_user_input(self, on_ask: Callable[[str], str]) -> bool:
         try:
-            question = input("\nUser: ").strip()
+            question = input("\n👤 User: ").strip()
             if question.lower() in self.EXIT_COMMANDS:
                 print("👋 Goodbye!")
                 return False
             if question:
-                print("Assistant: Thinking ...")
+                print("🤖 Assistant: Thinking ...")
                 result = await on_ask(question)
-                print("Assistant: ", result)
+                print("🤖 Assistant:", result)
             return True
         except KeyboardInterrupt:
             print("\n👋 Goodbye!")

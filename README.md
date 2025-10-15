@@ -25,10 +25,10 @@ python main.py
 
 ### Pull Request Management
 ```
-User: Which PRs could use my attention?
+👤 User: Which PRs could use my attention?
 
-Assistant: Thinking ...
-Assistant: Here are the PRs that could use your attention:
+🤖 Assistant: Thinking ...
+🤖 Assistant: Here are the PRs that could use your attention:
 
 **Your open PRs:**
 1) company/web-app #142 — "Add user authentication"
@@ -41,11 +41,10 @@ Assistant: Here are the PRs that could use your attention:
 
 If you'd like, I can: request a Copilot review, fetch reviewers details, or trigger CI runs.
 
-User: I want a Copilot review
+👤 User: I want a Copilot review
 
-Assistant: Thinking ...
-
-Assistant: Copilot review requested for your PRs:
+🤖 Assistant: Thinking ...
+🤖 Assistant: Copilot review requested for your PRs:
 
 1) company/web-app #142 — "Add user authentication"
    - Link: https://github.com/company/web-app/pull/142
@@ -54,15 +53,13 @@ Assistant: Copilot review requested for your PRs:
 2) company/api #89 — "Refactor database queries"
    - Link: https://github.com/company/api/pull/89
    - Status: Copilot review requested
-
-Would you like me to check back for feedback once it's posted?
 ```
 
 ### Repository Insights
 ```
-User: What's the health status of my main repositories?
+👤 User: What's the health status of my main repositories?
 
-Assistant: Here's the health overview of your repositories:
+🤖 Assistant: Here's the health overview of your repositories:
 
 **Active Development:**
 - company/core-api: 12 open PRs, 3 failing CI, 8 pending reviews
@@ -80,9 +77,9 @@ Assistant: Here's the health overview of your repositories:
 
 ### Issue Tracking
 ```
-User: What critical issues should I tackle this week?
+👤 User: What critical issues should I tackle this week?
 
-Assistant: Here are the critical issues requiring immediate attention:
+🤖 Assistant: Here are the critical issues requiring immediate attention:
 
 **High Priority (P0):**
 1) company/api #234 - "Database connection pool exhaustion"
